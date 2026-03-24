@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { db } from '@/db/database'
 import { useAppStore } from '@/stores/appStore'
@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
 import { InfoBox } from '@/components/ui/InfoBox'
 import { hashPin } from '@/utils/privacy'
+import { parseStudentCsv } from '@/utils/studentCsvParser'
+import { seedDemoData } from '@/utils/demoData'
 
 interface StudentInput {
   name: string
@@ -30,6 +32,37 @@ export function SetupWizard() {
   const [pin, setPin] = useState('')
   const [students, setStudents] = useState<StudentInput[]>([{ name: '', butStatus: false }])
   const [saving, setSaving] = useState(false)
+  const [loadingDemo, setLoadingDemo] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleStartDemo() {
+    setLoadingDemo(true)
+    try {
+      await seedDemoData()
+      navigate('/')
+    } catch (err) {
+      console.error('Demo-Fehler:', err)
+    } finally {
+      setLoadingDemo(false)
+    }
+  }
+
+  function handleCsvImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const text = reader.result as string
+      const parsed = parseStudentCsv(text)
+      if (parsed.length === 0) return
+      // Keep existing non-empty students, replace empty ones
+      const existing = students.filter((s) => s.name.trim())
+      setStudents([...existing, ...parsed])
+    }
+    reader.readAsText(file, 'utf-8')
+    // Reset so the same file can be re-imported
+    e.target.value = ''
+  }
 
   function addStudent() {
     setStudents([...students, { name: '', butStatus: false }])
@@ -145,6 +178,23 @@ export function SetupWizard() {
       title: 'Schueler:innen',
       content: (
         <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="file"
+                accept=".csv,.txt,.tsv"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleCsvImport}
+              />
+              <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
+                CSV importieren
+              </Button>
+            </label>
+            <p className="text-xs text-stone-400">
+              Unterstützt: IServ, WebUntis, Excel-Export oder eine einfache Namensliste
+            </p>
+          </div>
           <InfoBox variant="privacy">
             Die BuT-Berechtigung ist eine besonders schuetzenswerte Information. Sie wird
             verschluesselt gespeichert und erscheint in keinem Export oder Elternbrief.
@@ -254,6 +304,23 @@ export function SetupWizard() {
       title: 'Schüler:innen',
       content: (
         <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="file"
+                accept=".csv,.txt,.tsv"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleCsvImport}
+              />
+              <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
+                CSV importieren
+              </Button>
+            </label>
+            <p className="text-xs text-stone-400">
+              Unterstützt: IServ, WebUntis, Excel-Export oder eine einfache Namensliste
+            </p>
+          </div>
           <InfoBox variant="privacy">
             Die BuT-Berechtigung ist eine besonders schützenswerte Information. Sie wird
             verschlüsselt gespeichert und erscheint in keinem Export oder Elternbrief.
@@ -422,6 +489,18 @@ export function SetupWizard() {
             </Button>
           )}
         </div>
+
+        {step === 0 && !isAddClassMode && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleStartDemo}
+              disabled={loadingDemo}
+              className="text-sm text-stone-500 underline decoration-stone-300 underline-offset-2 hover:text-brand-primary disabled:opacity-50"
+            >
+              {loadingDemo ? 'Demo wird geladen...' : 'Oder: Demo mit Beispieldaten starten'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

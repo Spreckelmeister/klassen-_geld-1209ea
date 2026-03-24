@@ -30,9 +30,12 @@ export function Layout({ children }: { children: ReactNode }) {
         Zum Inhalt springen
       </a>
 
-      <header className="sticky top-0 z-30 border-b border-stone-100 bg-white/80 backdrop-blur-md" role="banner">
+      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md" role="banner" style={{boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.03)'}}>
         <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
-          <h1 className="text-lg font-bold text-brand-primary">Klassenkasse</h1>
+          <h1 className="text-lg font-bold text-brand-primary flex items-center gap-2">
+            <svg className="h-6 w-6 text-brand-primary" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" /></svg>
+            Klassenkasse
+          </h1>
           {classes && classes.length > 1 && (
             <ClassSelector
               classes={classes}
@@ -46,7 +49,8 @@ export function Layout({ children }: { children: ReactNode }) {
       <main id="main-content" className="mx-auto w-full max-w-lg flex-1 px-4 pb-24 pt-4" role="main">{children}</main>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 border-t border-stone-100 bg-white/90 backdrop-blur-md"
+        className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md"
+        style={{boxShadow: '0 -1px 3px 0 rgb(0 0 0 / 0.05), 0 -4px 6px -4px rgb(0 0 0 / 0.03)'}}
         aria-label="Hauptnavigation"
       >
         <div className="mx-auto flex max-w-lg items-center justify-around py-1">
@@ -57,8 +61,8 @@ export function Layout({ children }: { children: ReactNode }) {
               className={({ isActive }) =>
                 `flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
                   isActive
-                    ? 'text-brand-primary'
-                    : 'text-stone-400 hover:text-stone-600'
+                    ? 'text-brand-primary font-semibold'
+                    : 'text-slate-400 hover:text-slate-600'
                 }`
               }
             >
@@ -96,14 +100,14 @@ export function MoreMenu() {
         <button
           key={to}
           onClick={() => navigate(to)}
-          className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm border border-stone-100 text-left hover:bg-stone-50 transition-colors min-h-[44px]"
+          className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-card border border-slate-200/60 text-left hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 min-h-[44px]"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-600">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
             <Icon />
           </div>
           <div>
             <p className="text-sm font-medium">{label}</p>
-            <p className="text-xs text-stone-400">{desc}</p>
+            <p className="text-xs text-slate-400">{desc}</p>
           </div>
         </button>
       ))}

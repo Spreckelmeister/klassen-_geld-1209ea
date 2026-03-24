@@ -14,7 +14,7 @@ export function Dashboard() {
   const students = useClassStudents()
 
   if (!transactions || !students || !classInfo) {
-    return <div className="flex h-40 items-center justify-center text-stone-400">Laden...</div>
+    return <div className="flex h-40 items-center justify-center text-slate-400">Laden...</div>
   }
 
   const activeTransactions = transactions.filter((t) => !t.isStorno)
@@ -47,30 +47,44 @@ export function Dashboard() {
 
   const studentMap = new Map(students.map((s) => [s.id, s.name]))
 
+  const isDemo = localStorage.getItem('isDemo') === 'true'
+
+  const progressPercent = totalStudents > 0 ? (paidCount / totalStudents) * 100 : 0
+
   return (
     <div className="flex flex-col gap-4">
       <PrivacyBanner />
 
+      {isDemo && (
+        <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-center text-xs font-medium text-amber-700">
+          Demo-Modus — Daten können in den Einstellungen zurückgesetzt werden
+        </div>
+      )}
+
       {/* Balance Card */}
-      <Card className="bg-brand-primary text-white" role="status" aria-live="polite">
-        <p className="text-sm font-medium text-stone-300">Kontostand</p>
-        <p className={`currency text-3xl ${balance < 0 ? 'text-rose-300' : 'text-white'}`} aria-label={`Kontostand: ${formatCurrency(balance)}`}>
-          {formatCurrency(balance)}
-        </p>
-        <p className="mt-1 text-xs text-stone-400">
-          Klasse {classInfo.className} · {classInfo.schoolYear}
-        </p>
+      <Card className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white shadow-balance relative overflow-hidden" role="status" aria-live="polite">
+        {/* Subtle decorative pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px'}} />
+        <div className="relative">
+          <p className="text-sm font-medium text-slate-300">Kontostand</p>
+          <p className={`currency text-4xl mt-1 ${balance < 0 ? 'text-rose-300' : 'text-white'}`} aria-label={`Kontostand: ${formatCurrency(balance)}`}>
+            {formatCurrency(balance)}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Klasse {classInfo.className} &middot; {classInfo.schoolYear}
+          </p>
+        </div>
       </Card>
 
       {/* Income / Expense Summary */}
       <div className="grid grid-cols-2 gap-3">
-        <Card>
-          <p className="text-xs font-medium text-stone-500">Einnahmen</p>
-          <p className="currency text-xl text-brand-income">{formatCurrency(totalIncome)}</p>
+        <Card className="border-l-4 border-l-brand-income bg-brand-income-light/30">
+          <p className="text-xs font-medium text-slate-500">Einnahmen</p>
+          <p className="currency text-xl text-brand-income mt-1">{formatCurrency(totalIncome)}</p>
         </Card>
-        <Card>
-          <p className="text-xs font-medium text-stone-500">Ausgaben</p>
-          <p className="currency text-xl text-brand-expense">{formatCurrency(totalExpense)}</p>
+        <Card className="border-l-4 border-l-brand-expense bg-brand-expense-light/30">
+          <p className="text-xs font-medium text-slate-500">Ausgaben</p>
+          <p className="currency text-xl text-brand-expense mt-1">{formatCurrency(totalExpense)}</p>
         </Card>
       </div>
 
@@ -79,8 +93,8 @@ export function Dashboard() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Zahlungsstatus</p>
-              <p className="text-xs text-stone-500">
+              <p className="text-sm font-semibold text-slate-800">Zahlungsstatus</p>
+              <p className="text-xs text-slate-500 mt-0.5">
                 {paidCount} von {totalStudents} bezahlt
               </p>
             </div>
@@ -95,13 +109,13 @@ export function Dashboard() {
             </Badge>
           </div>
           {/* Progress bar */}
-          <div className="mt-3 h-2 rounded-full bg-stone-100">
+          <div className="mt-3 h-2.5 rounded-full bg-slate-100 overflow-hidden">
             <div
-              className="h-2 rounded-full bg-brand-income transition-all"
-              style={{ width: `${totalStudents > 0 ? (paidCount / totalStudents) * 100 : 0}%` }}
+              className="h-2.5 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-stone-400">
+          <p className="mt-2 text-xs text-slate-400">
             Der individuelle Zahlungsstatus ist ausschließlich für den Kassenwart sichtbar.
           </p>
         </Card>
@@ -109,47 +123,64 @@ export function Dashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3">
-        <Button variant="income" onClick={() => navigate('/add-transaction?type=income')} className="w-full">
-          + Einnahme
+        <Button variant="income" size="lg" onClick={() => navigate('/add-transaction?type=income')} className="w-full">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+          Einnahme
         </Button>
-        <Button variant="expense" onClick={() => navigate('/add-transaction?type=expense')} className="w-full">
-          − Ausgabe
+        <Button variant="expense" size="lg" onClick={() => navigate('/add-transaction?type=expense')} className="w-full">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" /></svg>
+          Ausgabe
         </Button>
       </div>
 
       {/* Recent Transactions */}
       <Card padding={false}>
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h2 className="text-sm font-semibold">Letzte Buchungen</h2>
+          <h2 className="text-sm font-bold text-slate-800">Letzte Buchungen</h2>
           <button
             onClick={() => navigate('/transactions')}
-            className="text-xs font-medium text-brand-info hover:underline min-h-[44px] flex items-center"
+            className="text-xs font-semibold text-brand-info hover:text-blue-700 transition-colors min-h-[44px] flex items-center"
           >
             Alle anzeigen
           </button>
         </div>
         {recentTransactions.length === 0 ? (
-          <p className="px-5 pb-5 text-sm text-stone-400">Noch keine Buchungen vorhanden.</p>
+          <p className="px-5 pb-5 text-sm text-slate-400">Noch keine Buchungen vorhanden.</p>
         ) : (
-          <ul className="divide-y divide-stone-50">
+          <ul className="divide-y divide-slate-100/80">
             {recentTransactions.map((t) => (
-              <li key={t.id} className="flex items-center justify-between px-5 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {t.description || t.category}
-                    {t.isStorno && (
-                      <span className="ml-2 text-xs text-stone-400">(storniert)</span>
+              <li key={t.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/50 transition-colors">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                    t.isStorno
+                      ? 'bg-slate-100 text-slate-400'
+                      : t.type === 'income'
+                        ? 'bg-brand-income-light text-brand-income'
+                        : 'bg-brand-expense-light text-brand-expense'
+                  }`}>
+                    {t.type === 'income' ? (
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>
+                    ) : (
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" /></svg>
                     )}
-                  </p>
-                  <p className="text-xs text-stone-400">
-                    {formatDate(t.date)}
-                    {t.studentId ? ` · ${studentMap.get(t.studentId) ?? ''}` : ''}
-                  </p>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-800">
+                      {t.description || t.category}
+                      {t.isStorno && (
+                        <span className="ml-2 text-xs text-slate-400">(storniert)</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {formatDate(t.date)}
+                      {t.studentId ? ` · ${studentMap.get(t.studentId) ?? ''}` : ''}
+                    </p>
+                  </div>
                 </div>
                 <span
-                  className={`currency text-sm ${
+                  className={`currency text-sm ml-3 ${
                     t.isStorno
-                      ? 'text-stone-400 line-through'
+                      ? 'text-slate-400 line-through'
                       : t.type === 'income'
                         ? 'text-brand-income'
                         : 'text-brand-expense'

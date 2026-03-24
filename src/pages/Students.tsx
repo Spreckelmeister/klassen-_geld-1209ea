@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import QRCode from 'qrcode'
 import { db } from '@/db/database'
 import { Card } from '@/components/ui/Card'
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Input } from '@/components/ui/Input'
 import { InfoBox } from '@/components/ui/InfoBox'
 import { formatCurrency } from '@/utils/format'
+import { parseStudentCsv } from '@/utils/studentCsvParser'
 import { generateReminderText } from '@/utils/privacy'
 import { useClassStudents, useClassTransactions, useActiveClassInfo, useActiveClassId } from '@/hooks/useClassData'
 
@@ -24,6 +25,28 @@ export function Students() {
   const [linkCopied, setLinkCopied] = useState<number | null>(null)
   const [showQR, setShowQR] = useState<number | null>(null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const csvInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleCsvImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !activeClassId) return
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const text = reader.result as string
+      const parsed = parseStudentCsv(text)
+      for (const s of parsed) {
+        await db.students.add({
+          name: s.name,
+          butStatus: s.butStatus,
+          notes: '',
+          classId: activeClassId,
+          createdAt: new Date(),
+        })
+      }
+    }
+    reader.readAsText(file, 'utf-8')
+    e.target.value = ''
+  }
 
   if (!students || !transactions || !classInfo) {
     return <div className="flex h-40 items-center justify-center text-stone-400">Laden...</div>
@@ -62,9 +85,21 @@ export function Students() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Schüler:innen</h1>
-        <Button size="sm" onClick={() => setShowAddForm(!showAddForm)}>
-          {showAddForm ? 'Abbrechen' : '+ Kind'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            accept=".csv,.txt,.tsv"
+            className="hidden"
+            ref={csvInputRef}
+            onChange={handleCsvImport}
+          />
+          <Button variant="secondary" size="sm" onClick={() => csvInputRef.current?.click()}>
+            CSV
+          </Button>
+          <Button size="sm" onClick={() => setShowAddForm(!showAddForm)}>
+            {showAddForm ? 'Abbrechen' : '+ Kind'}
+          </Button>
+        </div>
       </div>
 
       <InfoBox variant="privacy">

@@ -9,11 +9,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-brand-primary text-white hover:bg-stone-700 focus:ring-brand-primary',
-  secondary: 'bg-stone-100 text-brand-primary hover:bg-stone-200 focus:ring-stone-400',
-  ghost: 'bg-transparent text-brand-primary hover:bg-stone-100 focus:ring-stone-400',
-  income: 'bg-brand-income text-white hover:bg-emerald-700 focus:ring-brand-income',
-  expense: 'bg-brand-expense text-white hover:bg-rose-700 focus:ring-brand-expense',
+  primary: 'bg-gradient-to-b from-slate-700 to-slate-900 text-white hover:from-slate-600 hover:to-slate-800 focus:ring-brand-primary shadow-sm',
+  secondary: 'bg-slate-100 text-brand-primary hover:bg-slate-200 focus:ring-slate-400',
+  ghost: 'bg-transparent text-brand-primary hover:bg-slate-100 focus:ring-slate-400',
+  income: 'bg-gradient-to-b from-emerald-400 to-emerald-600 text-white hover:from-emerald-300 hover:to-emerald-500 focus:ring-brand-income shadow-sm',
+  expense: 'bg-gradient-to-b from-rose-400 to-rose-600 text-white hover:from-rose-300 hover:to-rose-500 focus:ring-brand-expense shadow-sm',
   danger: 'bg-red-50 text-red-700 hover:bg-red-100 focus:ring-red-400',
 }
 
@@ -32,7 +32,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97] ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {children}

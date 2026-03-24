@@ -6,9 +6,9 @@ interface InfoBoxProps {
 }
 
 const variantStyles = {
-  info: 'bg-sky-50 border-sky-200 text-sky-800',
-  warning: 'bg-amber-50 border-amber-200 text-amber-800',
-  privacy: 'bg-sky-50 border-sky-200 text-sky-800',
+  info: 'border-l-brand-info bg-brand-info-light/40 text-blue-900',
+  warning: 'border-l-brand-warning bg-brand-warning-light/40 text-amber-900',
+  privacy: 'border-l-brand-info bg-brand-info-light/40 text-blue-900',
 }
 
 const icons = {
@@ -20,10 +20,10 @@ const icons = {
 export function InfoBox({ children, variant = 'info' }: InfoBoxProps) {
   return (
     <div
-      className={`rounded-xl border p-4 text-sm leading-relaxed ${variantStyles[variant]}`}
+      className={`rounded-xl border-l-4 border border-transparent p-5 text-sm leading-relaxed ${variantStyles[variant]}`}
       role="note"
     >
-      <span className="mr-2" aria-hidden="true">{icons[variant]}</span>
+      <span className="mr-2 text-base" aria-hidden="true">{icons[variant]}</span>
       {children}
     </div>
   )

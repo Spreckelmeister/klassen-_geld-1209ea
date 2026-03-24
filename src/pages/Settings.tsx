@@ -8,6 +8,7 @@ import { InfoBox } from '@/components/ui/InfoBox'
 import { hashPin } from '@/utils/privacy'
 import { useActiveClassInfo, useAllClasses } from '@/hooks/useClassData'
 import { useAppStore } from '@/stores/appStore'
+import { clearDemoData } from '@/utils/demoData'
 
 export function Settings() {
   const navigate = useNavigate()
@@ -246,6 +247,28 @@ export function Settings() {
           + Neue Klasse hinzufuegen
         </Button>
       </Card>
+
+      {/* Demo Reset */}
+      {localStorage.getItem('isDemo') === 'true' && (
+        <Card>
+          <h2 className="text-sm font-semibold mb-2">Demo-Modus</h2>
+          <p className="text-xs text-stone-500 mb-3">
+            Sie verwenden die App mit Beispieldaten. Setzen Sie die Demo zurück, um mit eigenen Daten neu zu starten.
+          </p>
+          <Button
+            variant="danger"
+            className="w-full"
+            onClick={() => {
+              const confirmed = window.confirm(
+                'Alle Demo-Daten werden gelöscht und die App wird zurückgesetzt. Fortfahren?'
+              )
+              if (confirmed) clearDemoData()
+            }}
+          >
+            Demo-Daten löschen & neu starten
+          </Button>
+        </Card>
+      )}
 
       {/* Version */}
       <div className="text-center text-xs text-stone-400 py-4">

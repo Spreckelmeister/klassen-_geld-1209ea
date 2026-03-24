@@ -1,0 +1,227 @@
+import { type ReactNode } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useAllClasses } from '@/hooks/useClassData'
+import { useAppStore } from '@/stores/appStore'
+import { ClassSelector } from '@/components/ClassSelector'
+
+const navItems = [
+  { to: '/', label: 'Start', icon: HomeIcon },
+  { to: '/transactions', label: 'Buch', icon: BookIcon },
+  { to: '/students', label: 'Klasse', icon: UsersIcon },
+  { to: '/more', label: 'Mehr', icon: MoreIcon },
+]
+
+export function Layout({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const isSetup = location.pathname === '/setup'
+  const classes = useAllClasses()
+  const activeClassId = useAppStore((s) => s.activeClassId)
+  const setActiveClassId = useAppStore((s) => s.setActiveClassId)
+
+  if (isSetup) return <>{children}</>
+
+  return (
+    <div className="flex min-h-dvh flex-col bg-brand-bg">
+      {/* Skip to content - WCAG 2.1 */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-xl focus:bg-brand-primary focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+      >
+        Zum Inhalt springen
+      </a>
+
+      <header className="sticky top-0 z-30 border-b border-stone-100 bg-white/80 backdrop-blur-md" role="banner">
+        <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
+          <h1 className="text-lg font-bold text-brand-primary">Klassenkasse</h1>
+          {classes && classes.length > 1 && (
+            <ClassSelector
+              classes={classes}
+              activeId={activeClassId}
+              onChange={setActiveClassId}
+            />
+          )}
+        </div>
+      </header>
+
+      <main id="main-content" className="mx-auto w-full max-w-lg flex-1 px-4 pb-24 pt-4" role="main">{children}</main>
+
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-30 border-t border-stone-100 bg-white/90 backdrop-blur-md"
+        aria-label="Hauptnavigation"
+      >
+        <div className="mx-auto flex max-w-lg items-center justify-around py-1">
+          {navItems.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
+                  isActive
+                    ? 'text-brand-primary'
+                    : 'text-stone-400 hover:text-stone-600'
+                }`
+              }
+            >
+              <Icon />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+    </div>
+  )
+}
+
+// "Mehr" page used as a hub for secondary features
+export function MoreMenu() {
+  const navigate = useNavigate()
+
+  const menuItems = [
+    { to: '/qrcode', label: 'QR-Code Zahlung', desc: 'EPC/GiroCode für Banking-Apps', icon: QRIcon },
+    { to: '/letter', label: 'Elternbrief', desc: 'PDF mit QR-Code erstellen', icon: LetterIcon },
+    { to: '/budget', label: 'Budget-Planer', desc: 'Ausgaben planen, Geld reicht?', icon: BudgetIcon },
+    { to: '/fundraising', label: 'Fundraising', desc: 'Aktionen tracken, Netto-Gewinn', icon: FundraisingIcon },
+    { to: '/social-fund', label: 'Sozialfonds', desc: 'Diskreter Topf für Bedürftige', icon: HeartIcon },
+    { to: '/auditor', label: 'Kassenprüfung', desc: 'Nur-Lese-Ansicht für Prüfer:innen', icon: AuditIcon },
+    { to: '/handover', label: 'Übergabe & Wechsel', desc: 'Kassenwart-Wechsel, Schuljahreswechsel', icon: HandoverIcon },
+    { to: '/export', label: 'Export & Sicherung', desc: 'CSV, PDF-Bericht, Backup', icon: DownloadIcon },
+    { to: '/bank-import', label: 'Bank-Import', desc: 'Kontoauszug importieren, Zahlungen zuordnen', icon: BankImportIcon },
+    { to: '/settings', label: 'Einstellungen', desc: 'PIN, Prüfer-PIN, Klassendaten', icon: SettingsIcon },
+  ]
+
+  return (
+    <div className="flex flex-col gap-2">
+      <h1 className="text-xl font-bold mb-2">Mehr</h1>
+      {menuItems.map(({ to, label, desc, icon: Icon }) => (
+        <button
+          key={to}
+          onClick={() => navigate(to)}
+          className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm border border-stone-100 text-left hover:bg-stone-50 transition-colors min-h-[44px]"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-600">
+            <Icon />
+          </div>
+          <div>
+            <p className="text-sm font-medium">{label}</p>
+            <p className="text-xs text-stone-400">{desc}</p>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function HomeIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955a1.126 1.126 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+    </svg>
+  )
+}
+
+function BookIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+    </svg>
+  )
+}
+
+function UsersIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+    </svg>
+  )
+}
+
+function MoreIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+    </svg>
+  )
+}
+
+function DownloadIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+    </svg>
+  )
+}
+
+function QRIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+    </svg>
+  )
+}
+
+function LetterIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+    </svg>
+  )
+}
+
+function AuditIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+    </svg>
+  )
+}
+
+function SettingsIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    </svg>
+  )
+}
+
+function BudgetIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+    </svg>
+  )
+}
+
+function FundraisingIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+  )
+}
+
+function HeartIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+    </svg>
+  )
+}
+
+function HandoverIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+  )
+}
+
+function BankImportIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6M3.75 9v.75A2.25 2.25 0 0 0 6 12h12a2.25 2.25 0 0 0 2.25-2.25V9M3.75 21h16.5" />
+    </svg>
+  )
+}

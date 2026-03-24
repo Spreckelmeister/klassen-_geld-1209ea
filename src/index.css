@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
+    /* WCAG: respect user font size preferences */
+    font-size: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  /* WCAG: visible focus indicators */
+  :focus-visible {
+    outline: 2px solid #0284c7;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* WCAG: respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d6d3d1;
+    border-radius: 3px;
+  }
+}
+
+@layer utilities {
+  .currency {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-family: 'DM Sans', ui-monospace, monospace;
+  }
+}

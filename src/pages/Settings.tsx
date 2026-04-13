@@ -9,12 +9,18 @@ import { hashPin } from '@/utils/privacy'
 import { useActiveClassInfo, useAllClasses } from '@/hooks/useClassData'
 import { useAppStore } from '@/stores/appStore'
 import { clearDemoData } from '@/utils/demoData'
+import { useAIStore } from '@/stores/useAIStore'
+import { useAI } from '@/hooks/useAI'
+import { ModelSelector } from '@/components/ModelSelector'
 
 export function Settings() {
   const navigate = useNavigate()
   const classInfo = useActiveClassInfo()
   const allClasses = useAllClasses()
   const setActiveClassId = useAppStore((s) => s.setActiveClassId)
+  const aiEnabled = useAIStore((s) => s.aiEnabled)
+  const setAIEnabled = useAIStore((s) => s.setAIEnabled)
+  const setAIStatus = useAIStore((s) => s.setStatus)
 
   const [newPin, setNewPin] = useState('')
   const [auditorPin, setAuditorPin] = useState('')
@@ -248,6 +254,46 @@ export function Settings() {
         </Button>
       </Card>
 
+      {/* KI-Einstellungen */}
+      <Card>
+        <h2 className="text-sm font-semibold mb-3">KI-Assistent</h2>
+        <InfoBox variant="info">
+          Die KI läuft komplett lokal in Ihrem Browser. Keine Daten verlassen Ihr Gerät.
+          Sie benötigen einen Browser mit WebGPU-Unterstützung (Chrome 113+, Edge 113+).
+        </InfoBox>
+
+        <div className="mt-3">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={aiEnabled}
+              onChange={(e) => {
+                setAIEnabled(e.target.checked);
+                if (!e.target.checked) {
+                  import('@/ai/engine').then((m) => m.disposeEngine());
+                  setAIStatus('idle');
+                }
+              }}
+              className="h-5 w-5 rounded"
+            />
+            <div>
+              <span className="text-sm font-medium">KI aktivieren</span>
+              <p className="text-xs text-stone-500">Bank-Matching, Kategorisierung, Elternbriefe</p>
+            </div>
+          </label>
+        </div>
+
+        {aiEnabled && (
+          <div className="mt-4">
+            <h3 className="text-xs font-semibold text-stone-500 mb-2">KI-Modell wählen</h3>
+            <ModelSelector />
+            <div className="mt-3">
+              <AILoadButton />
+            </div>
+          </div>
+        )}
+      </Card>
+
       {/* Demo Reset */}
       {localStorage.getItem('isDemo') === 'true' && (
         <Card>
@@ -272,10 +318,71 @@ export function Settings() {
 
       {/* Version */}
       <div className="text-center text-xs text-stone-400 py-4">
-        Klassenkasse v1.0.0 · Open Source (MIT)
+        KlassenKasse AI v2.0.0 · Open Source (MIT)
         <br />
         Alle Daten lokal auf Ihrem Gerät.
       </div>
     </div>
   )
+}
+
+function AILoadButton() {
+  const { status, progress, error, loadModel, unloadModel } = useAI();
+
+  if (status === 'ready') {
+    return (
+      <Button variant="secondary" size="sm" className="w-full" onClick={unloadModel}>
+        KI-Modell entladen
+      </Button>
+    );
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="space-y-2">
+        <div className="h-2 w-full rounded-full bg-stone-200 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-violet-500 transition-all duration-300"
+            style={{ width: `${Math.max(2, Math.round(progress * 100))}%` }}
+          />
+        </div>
+        <p className="text-xs text-center text-violet-600">
+          {progress < 0.01
+            ? 'WebLLM-Bibliothek wird initialisiert...'
+            : `Modell wird heruntergeladen... ${Math.round(progress * 100)}%`}
+        </p>
+        <p className="text-xs text-center text-stone-400">
+          Beim ersten Mal kann das einige Minuten dauern.
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'unsupported') {
+    return (
+      <InfoBox variant="warning">
+        Ihr Browser unterstützt kein WebGPU. Die KI-Funktionen sind nicht verfügbar,
+        aber alle anderen Features funktionieren normal mit regelbasiertem Fallback.
+      </InfoBox>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div>
+        <InfoBox variant="warning">
+          {error || 'Fehler beim Laden des KI-Modells.'}
+        </InfoBox>
+        <Button size="sm" className="w-full mt-2" onClick={loadModel}>
+          Erneut versuchen
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" className="w-full" onClick={loadModel}>
+      KI-Modell laden
+    </Button>
+  );
 }

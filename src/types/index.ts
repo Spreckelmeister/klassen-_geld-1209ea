@@ -37,7 +37,17 @@ export interface Transaction {
   isStorno: boolean
   stornoRef?: number
   classId?: number
+  // GoBD-Hashkette
+  sequenceNo?: number
+  hashPrev?: string
+  hashSelf?: string
+  // §22 UStG
+  taxNote?: string
+  // KI-Felder
+  aiSuggested?: boolean
+  aiConfidence?: number
   createdAt: Date
+  updatedAt?: Date
 }
 
 export type TransactionCategory =
@@ -116,3 +126,32 @@ export interface AuditRecord {
   classId?: number
   createdAt: Date
 }
+
+// Bank-Transaktion (importiert aus CSV)
+export interface BankTransaction {
+  id?: number
+  rawLine: string
+  date: Date
+  amount: number
+  senderName: string
+  verwendungszweck: string
+  matchedStudentId?: number
+  matchedCategory?: string
+  aiConfidence?: number
+  confirmed: boolean
+  imported: boolean
+  classId?: number
+  createdAt: Date
+}
+
+// KI-Modell Info
+export interface AIModelInfo {
+  id: string
+  name: string
+  size: string
+  vramMB: number
+  description: string
+}
+
+// KI-Status
+export type AIStatus = 'idle' | 'loading' | 'ready' | 'error' | 'unsupported'

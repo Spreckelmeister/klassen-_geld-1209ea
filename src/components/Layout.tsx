@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAllClasses } from '@/hooks/useClassData'
 import { useAppStore } from '@/stores/appStore'
 import { ClassSelector } from '@/components/ClassSelector'
+import { AIStatusBar } from '@/components/AIStatusBar'
 
 const navItems = [
   { to: '/', label: 'Start', icon: HomeIcon },
@@ -36,13 +37,16 @@ export function Layout({ children }: { children: ReactNode }) {
             <svg className="h-6 w-6 text-brand-primary" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" /></svg>
             Klassenkasse
           </h1>
-          {classes && classes.length > 1 && (
-            <ClassSelector
-              classes={classes}
-              activeId={activeClassId}
-              onChange={setActiveClassId}
-            />
-          )}
+          <div className="flex items-center gap-2">
+            <AIStatusBar />
+            {classes && classes.length > 1 && (
+              <ClassSelector
+                classes={classes}
+                activeId={activeClassId}
+                onChange={setActiveClassId}
+              />
+            )}
+          </div>
         </div>
       </header>
 
@@ -88,9 +92,12 @@ export function MoreMenu() {
     { to: '/social-fund', label: 'Sozialfonds', desc: 'Diskreter Topf für Bedürftige', icon: HeartIcon },
     { to: '/auditor', label: 'Kassenprüfung', desc: 'Nur-Lese-Ansicht für Prüfer:innen', icon: AuditIcon },
     { to: '/handover', label: 'Übergabe & Wechsel', desc: 'Kassenwart-Wechsel, Schuljahreswechsel', icon: HandoverIcon },
-    { to: '/export', label: 'Export & Sicherung', desc: 'CSV, PDF-Bericht, Backup', icon: DownloadIcon },
+    { to: '/sync', label: 'Sync & Backup', desc: 'WLAN-Sync, verschlüsseltes Backup', icon: SyncIcon },
+    { to: '/export', label: 'Export & Sicherung', desc: 'CSV, PDF-Bericht, DATEV', icon: DownloadIcon },
+    { to: '/pdf-import', label: 'PDF-Rechnung', desc: 'Rechnung hochladen, KI liest Daten aus', icon: PDFIcon },
     { to: '/bank-import', label: 'Bank-Import', desc: 'Kontoauszug importieren, Zahlungen zuordnen', icon: BankImportIcon },
-    { to: '/settings', label: 'Einstellungen', desc: 'PIN, Prüfer-PIN, Klassendaten', icon: SettingsIcon },
+    { to: '/ai-governance', label: 'KI-Transparenz', desc: 'AI Act Dokumentation, Datenschutz', icon: AIIcon },
+    { to: '/settings', label: 'Einstellungen', desc: 'PIN, KI-Modell, Klassendaten', icon: SettingsIcon },
   ]
 
   return (
@@ -218,6 +225,30 @@ function HandoverIcon() {
   return (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+  )
+}
+
+function PDFIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+    </svg>
+  )
+}
+
+function SyncIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+    </svg>
+  )
+}
+
+function AIIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
     </svg>
   )
 }

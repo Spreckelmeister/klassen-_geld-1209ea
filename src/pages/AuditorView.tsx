@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { verifyPin } from '@/utils/privacy'
 import { generateAnnualReportPDF } from '@/utils/pdf'
+import { sha256, verifyHashChain } from '@/crypto/hash'
 import type { Transaction } from '@/types'
 import { useActiveClassInfo, useClassTransactions, useClassStudents, useClassAuditRecords, useActiveClassId } from '@/hooks/useClassData'
 
@@ -16,11 +17,7 @@ async function hashTransactions(transactions: Transaction[]): Promise<string> {
   const data = sorted
     .map((t) => `${t.id}|${new Date(t.date).toISOString()}|${t.amount}|${t.type}|${t.category}`)
     .join('\n')
-  const encoder = new TextEncoder()
-  const hash = await crypto.subtle.digest('SHA-256', encoder.encode(data))
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
+  return sha256(data)
 }
 
 export function AuditorView() {
@@ -31,6 +28,8 @@ export function AuditorView() {
   const [auditConfirmed, setAuditConfirmed] = useState(false)
   const [auditorNameInput, setAuditorNameInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const [chainStatus, setChainStatus] = useState<'idle' | 'checking' | 'valid' | 'broken'>('idle')
+  const [chainBrokenAt, setChainBrokenAt] = useState<number | undefined>()
 
   const classInfo = useActiveClassInfo()
   const transactions = useClassTransactions()
@@ -231,6 +230,53 @@ export function AuditorView() {
             </li>
           ))}
         </ul>
+      </Card>
+
+      {/* GoBD Hash Chain Verification */}
+      <Card>
+        <h2 className="text-sm font-semibold mb-3">GoBD-Integritätsprüfung</h2>
+        <p className="text-xs text-stone-500 mb-3">
+          Prüft die kryptographische Verkettung aller Buchungen. Jede nachträgliche Änderung wird erkannt.
+        </p>
+        {chainStatus === 'idle' && (
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={async () => {
+              setChainStatus('checking')
+              const result = await verifyHashChain(transactions!)
+              if (result.valid) {
+                setChainStatus('valid')
+              } else {
+                setChainStatus('broken')
+                setChainBrokenAt(result.brokenAt)
+              }
+            }}
+          >
+            Hashkette prüfen
+          </Button>
+        )}
+        {chainStatus === 'checking' && (
+          <p className="text-sm text-stone-500">Prüfung läuft...</p>
+        )}
+        {chainStatus === 'valid' && (
+          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3">
+            <svg className="h-5 w-5 text-brand-income flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <span className="text-sm text-emerald-800 font-medium">Hashkette intakt — keine Manipulation erkannt</span>
+          </div>
+        )}
+        {chainStatus === 'broken' && (
+          <div className="flex items-center gap-2 rounded-xl bg-rose-50 p-3">
+            <svg className="h-5 w-5 text-brand-expense flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            </svg>
+            <span className="text-sm text-rose-800 font-medium">
+              Hashkette unterbrochen bei Buchung #{chainBrokenAt}
+            </span>
+          </div>
+        )}
       </Card>
 
       {/* Actions */}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { db } from '@/db/database'
+import { stornoTransaction } from '@/db/transactionService'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -41,22 +41,7 @@ export function Transactions() {
   })
 
   async function handleStorno(transactionId: number) {
-    const t = await db.transactions.get(transactionId)
-    if (!t || t.isStorno) return
-
-    await db.transactions.update(transactionId, { isStorno: true })
-    await db.transactions.add({
-      type: t.type === 'income' ? 'expense' : 'income',
-      amount: t.amount,
-      date: new Date(),
-      category: t.category,
-      description: `Storno: ${t.description || t.category}`,
-      studentId: t.studentId,
-      classId: t.classId,
-      isStorno: true,
-      stornoRef: transactionId,
-      createdAt: new Date(),
-    })
+    await stornoTransaction(transactionId)
   }
 
   return (

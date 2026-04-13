@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { db } from '@/db/database'
+import { createTransaction } from '@/db/transactionService'
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '@/types'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -48,7 +48,7 @@ export function AddTransaction() {
     try {
       if (isBulk && type === 'income' && students) {
         for (const student of students) {
-          await db.transactions.add({
+          await createTransaction({
             type,
             amount: parsedAmount,
             date: new Date(date),
@@ -58,11 +58,10 @@ export function AddTransaction() {
             receiptPhoto: receiptPhoto ?? undefined,
             isStorno: false,
             classId: activeClassId ?? undefined,
-            createdAt: new Date(),
           })
         }
       } else {
-        await db.transactions.add({
+        await createTransaction({
           type,
           amount: parsedAmount,
           date: new Date(date),
@@ -72,7 +71,6 @@ export function AddTransaction() {
           receiptPhoto: receiptPhoto ?? undefined,
           isStorno: false,
           classId: activeClassId ?? undefined,
-          createdAt: new Date(),
         })
       }
       navigate(-1)

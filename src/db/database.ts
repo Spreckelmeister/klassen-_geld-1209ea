@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { ClassInfo, Student, Transaction, DueDate, BudgetItem, FundraisingAction, SocialFund, AuditRecord } from '@/types'
+import type { ClassInfo, Student, Transaction, DueDate, BudgetItem, FundraisingAction, SocialFund, AuditRecord, BankTransaction } from '@/types'
 
 class KlassenkasseDB extends Dexie {
   classInfo!: Table<ClassInfo>
@@ -10,6 +10,7 @@ class KlassenkasseDB extends Dexie {
   fundraisingActions!: Table<FundraisingAction>
   socialFund!: Table<SocialFund>
   auditRecords!: Table<AuditRecord>
+  bankTransactions!: Table<BankTransaction>
 
   constructor() {
     super('klassenkasse')
@@ -66,6 +67,29 @@ class KlassenkasseDB extends Dexie {
         tx.table('socialFund').toCollection().modify(s => { if (!s.classId) s.classId = 1; }),
         tx.table('auditRecords').toCollection().modify(a => { if (!a.classId) a.classId = 1; }),
       ])
+    })
+
+    // v6: GoBD-Hashkette, KI-Felder, BankTransactions-Tabelle
+    this.version(6).stores({
+      classInfo: '++id',
+      students: '++id, name, selfServiceToken, classId',
+      transactions: '++id, type, category, date, studentId, isStorno, classId, sequenceNo',
+      dueDates: '++id, dueDate, classId',
+      budgetItems: '++id, plannedDate, completed, classId',
+      fundraisingActions: '++id, date, completed, classId',
+      socialFund: '++id, type, date, studentId, classId',
+      auditRecords: '++id, date, classId',
+      bankTransactions: '++id, date, confirmed, imported, classId',
+    }).upgrade(tx => {
+      // Bestehende Buchungen: GoBD-Defaults + KI-Defaults setzen
+      return tx.table('transactions').toCollection().modify(t => {
+        if (t.sequenceNo === undefined) t.sequenceNo = 0;
+        if (t.hashPrev === undefined) t.hashPrev = 'GENESIS';
+        if (t.hashSelf === undefined) t.hashSelf = '';
+        if (t.taxNote === undefined) t.taxNote = '';
+        if (t.aiSuggested === undefined) t.aiSuggested = false;
+        if (t.updatedAt === undefined) t.updatedAt = t.createdAt;
+      });
     })
   }
 }

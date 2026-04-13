@@ -23,6 +23,9 @@ const FundraisingTracker = lazy(() => import('@/pages/FundraisingTracker').then(
 const Handover = lazy(() => import('@/pages/Handover').then((m) => ({ default: m.Handover })))
 const SocialFund = lazy(() => import('@/pages/SocialFund').then((m) => ({ default: m.SocialFund })))
 const BankImport = lazy(() => import('@/pages/BankImport').then((m) => ({ default: m.BankImport })))
+const AIGovernance = lazy(() => import('@/pages/AIGovernance').then((m) => ({ default: m.AIGovernance })))
+const SyncPage = lazy(() => import('@/pages/Sync').then((m) => ({ default: m.Sync })))
+const PDFImport = lazy(() => import('@/pages/PDFImport').then((m) => ({ default: m.PDFImport })))
 
 function PageLoader() {
   return (
@@ -93,6 +96,9 @@ export default function App() {
           <Route path="/handover" element={<Handover />} />
           <Route path="/social-fund" element={<SocialFund />} />
           <Route path="/bank-import" element={<BankImport />} />
+          <Route path="/ai-governance" element={<AIGovernance />} />
+          <Route path="/sync" element={<SyncPage />} />
+          <Route path="/pdf-import" element={<PDFImport />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

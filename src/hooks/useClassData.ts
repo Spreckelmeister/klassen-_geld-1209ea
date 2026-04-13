@@ -73,3 +73,11 @@ export function useClassAuditRecords() {
     return db.auditRecords.toArray()
   }, [activeClassId])
 }
+
+export function useClassBankTransactions() {
+  const activeClassId = useAppStore((s) => s.activeClassId)
+  return useLiveQuery(() => {
+    if (activeClassId) return db.bankTransactions.where('classId').equals(activeClassId).toArray()
+    return db.bankTransactions.toArray()
+  }, [activeClassId])
+}

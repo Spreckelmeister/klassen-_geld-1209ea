@@ -4,6 +4,7 @@ import { useAllClasses } from '@/hooks/useClassData'
 import { useAppStore } from '@/stores/appStore'
 import { ClassSelector } from '@/components/ClassSelector'
 import { AIStatusBar } from '@/components/AIStatusBar'
+import { InstallBanner } from '@/components/InstallBanner'
 
 const navItems = [
   { to: '/', label: 'Start', icon: HomeIcon },
@@ -49,6 +50,8 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
+
+      <InstallBanner />
 
       <main id="main-content" className="mx-auto w-full max-w-lg flex-1 px-4 pb-24 pt-4" role="main">{children}</main>
 
